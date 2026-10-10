@@ -1,6 +1,7 @@
 import type { Request, Response } from "express";
 import User from "../models/User.js";
 import bcrypt from "bcrypt";
+import { generateToken } from "../middleware/token.js";
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -51,7 +52,7 @@ export const login = async (req: Request, res: Response) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: "Invallied cridential",
+        message: "Invalid credentials",
       });
     }
 
@@ -60,17 +61,27 @@ export const login = async (req: Request, res: Response) => {
     if (!isPasswordMatch) {
       return res.status(401).json({
         success: false,
-        message: "Invallied cridential",
+        message: "Invalid credentials",
       });
     }
 
+    const token = generateToken(user._id.toString(), user.email);
+
     const { password: removePassword, ...userData } = user.toObject();
 
-    res.status(201).json({
-      success: true,
-      message: "User logged in successfully",
-      user: userData,
-    });
+    return res
+      .status(200)
+      .cookie("token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 5000,
+      })
+      .json({
+        success: true,
+        message: "User logged in successfully",
+        user: userData,
+      });
   } catch (error: unknown) {
     if (error instanceof Error) {
       return res.status(500).json({
@@ -78,7 +89,8 @@ export const login = async (req: Request, res: Response) => {
         message: error.message,
       });
     }
-    res.status(500).json({
+
+    return res.status(500).json({
       success: false,
       message: "Something went wrong",
     });

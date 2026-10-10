@@ -6,14 +6,20 @@ import {
   getSingleCourse,
   updateCourse,
 } from "../controllers/courseController.js";
+import { verifyToken } from "../middleware/token.js";
 
 const courseRoute = express.Router();
 
-courseRoute.route("/courses").post(createCourse).get(getCourses);
+// Public routes
+courseRoute.route("/courses").get(getCourses);
+courseRoute.route("/courses/:id").get(getSingleCourse);
+
+// Protected routes
+courseRoute.route("/courses").post(verifyToken, createCourse);
+
 courseRoute
   .route("/courses/:id")
-  .get(getSingleCourse)
-  .put(updateCourse)
-  .delete(deleteCourse);
+  .put(verifyToken, updateCourse)
+  .delete(verifyToken, deleteCourse);
 
 export default courseRoute;
