@@ -6,11 +6,16 @@ import {
   register,
 } from "../controllers/authController.js";
 
+import { verifyToken } from "../middleware/token.js";
+
 const authRoute = express.Router();
 
+// Public routes
 authRoute.route("/register").post(register);
 authRoute.route("/login").post(login);
-authRoute.route("/logout").post(logout);
-authRoute.route("/profile").get(getProfile);
+
+// Protected routes
+authRoute.route("/logout").post(verifyToken, logout);
+authRoute.route("/profile").get(verifyToken, getProfile);
 
 export default authRoute;

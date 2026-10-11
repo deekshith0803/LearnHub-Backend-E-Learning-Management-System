@@ -8,7 +8,7 @@ export const generateToken = (userID: string, userEmail: string): string => {
   };
 
   const token = jwt.sign(userDatas, process.env.JWT_SECRET_KEY!, {
-    expiresIn: "5m",
+    expiresIn: "30m",
   });
 
   return token;
@@ -20,24 +20,44 @@ export const verifyToken = async (
   next: NextFunction,
 ) => {
   try {
-    const { token } = req.cookies;
+    const { token } = req.cookies ?? {};
+
     if (!token) {
       return res.status(401).json({
         success: false,
-        message: "No token fount in cookies",
+        message: "No token found in cookies",
       });
     }
+
     const secret = process.env.JWT_SECRET_KEY;
 
     if (!secret) {
       throw new Error("JWT_SECRET_KEY is not configured");
     }
 
-    await jwt.verify(token, secret);
+    const decoded = await jwt.verify(token, secret);
 
-    // const decoded = await jwt.verify(token, secret);
-    // console.log("decoded-------->", decoded);
+    if (
+      typeof decoded === "string" ||
+      typeof decoded.userID !== "string" ||
+      typeof decoded.userEmail !== "string"
+    ) {
+      return res.status(401).json({
+        success: false,
+        message: "Invalid token payload",
+      });
+    }
 
-    next();
-  } catch (error) {}
+    req.user = {
+      userID: decoded.userID,
+      userEmail: decoded.userEmail,
+    };
+
+    return next();
+  } catch (error) {
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
+  }
 };
