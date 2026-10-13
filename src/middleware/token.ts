@@ -8,7 +8,7 @@ export const generateToken = (userID: string, userEmail: string): string => {
   };
 
   const token = jwt.sign(userDatas, process.env.JWT_SECRET_KEY!, {
-    expiresIn: "30m",
+    expiresIn: "7d",
   });
 
   return token;

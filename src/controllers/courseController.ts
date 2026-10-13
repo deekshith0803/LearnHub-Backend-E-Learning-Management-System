@@ -219,3 +219,5 @@ export const deleteCourse = async (req: Request, res: Response) => {
     });
   }
 };
+export const getInstructorCourses = async (req: Request, res: Response) => {};
+export const getInstructorStats = async (req: Request, res: Response) => {};
