@@ -45,7 +45,7 @@ src/
 ### 1. Clone the repository
 
 ```bash
-git clone <YOUR_GITHUB_REPOSITORY_URL>
+git clone https://github.com/deekshith0803/LearnHub-Backend-E-Learning-Management-System.git
 cd LearnHub-Backend-E-Learning-Management-System
 ```
 
@@ -175,7 +175,3 @@ Use **Postman** to test the API endpoints. For protected routes, log in first an
 
 - GitHub: [deekshith0803](https://github.com/deekshith0803)
 - Portfolio: [deekshith-five.vercel.app](https://deekshith-five.vercel.app/)
-
----
-
-Built as a full-stack development project to practice backend development, authentication, authorization, REST APIs, and database design.
