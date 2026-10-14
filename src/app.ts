@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import enrollmentRoute from "./routes/enrollmentRoutes.js";
 import progressRoute from "./routes/progressRoutes.js";
 import quizRoute from "./routes/quizRoutes.js";
+import adminRoute from "./routes/adminRoutes.js";
 
 const app = express();
 
@@ -23,5 +24,6 @@ app.use("/api", lessonRoute);
 app.use("/api", enrollmentRoute);
 app.use("/api", progressRoute);
 app.use("/api", quizRoute);
+app.use("/api", adminRoute);
 
 export default app;

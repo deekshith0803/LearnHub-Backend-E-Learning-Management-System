@@ -4,7 +4,7 @@ interface courseInterface {
   title: string;
   description: string;
   thumbnail: string;
-  instructor: ObjectId;
+  instructor: mongoose.Types.ObjectId;
   category: string;
   level: string;
   price: number;

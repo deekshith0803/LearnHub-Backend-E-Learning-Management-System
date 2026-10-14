@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyToken } from "../middleware/token.js";
+import { userAuthorize, verifyToken } from "../middleware/token.js";
 import {
   createQuiz,
   getQuiz,
@@ -8,11 +8,17 @@ import {
 
 const quizRoute = express.Router();
 
+// Instructor/admin: create a quiz
 quizRoute
   .route("/courses/:id/quiz")
-  .post(verifyToken, createQuiz)
-  .get(verifyToken, getQuiz);
+  .post(verifyToken, userAuthorize(["instructor", "admin"]), createQuiz);
 
-quizRoute.route("/quizzes/:id/submit").post(verifyToken, submitQuiz);
+// Authenticated users: retrieve quizzes
+quizRoute.route("/courses/:id/quiz").get(verifyToken, getQuiz);
+
+// Student: submit quiz answers
+quizRoute
+  .route("/quizzes/:id/submit")
+  .post(verifyToken, userAuthorize(["student"]), submitQuiz);
 
 export default quizRoute;

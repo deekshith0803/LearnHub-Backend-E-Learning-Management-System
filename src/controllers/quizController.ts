@@ -3,13 +3,6 @@ import mongoose from "mongoose";
 import Course from "../models/Course.js";
 import Quiz from "../models/Quiz.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    userID: string;
-    userEmail: string;
-  };
-}
-
 export const createQuiz = async (req: Request, res: Response) => {
   try {
     const { id: course } = req.params;
@@ -97,7 +90,7 @@ export const getQuiz = async (req: Request, res: Response) => {
   }
 };
 
-export const submitQuiz = async (req: AuthRequest, res: Response) => {
+export const submitQuiz = async (req: Request, res: Response) => {
   try {
     const { id: quizId } = req.params;
     const { answers } = req.body;

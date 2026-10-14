@@ -5,20 +5,21 @@ import {
   getLessons,
   updateLesson,
 } from "../controllers/lessonController.js";
-import { verifyToken } from "../middleware/token.js";
+import { userAuthorize, verifyToken } from "../middleware/token.js";
 
 const lessonRoute = express.Router();
 
 // Public route
 lessonRoute.route("/courses/:id/lessons").get(getLessons);
 
-// Protected route
-lessonRoute.route("/courses/:id/lessons").post(verifyToken, addLesson);
+// Instructor/admin route
+lessonRoute
+  .route("/courses/:id/lessons")
+  .post(verifyToken, userAuthorize(["instructor", "admin"]), addLesson);
 
-// Protected lesson management
 lessonRoute
   .route("/lessons/:id")
-  .put(verifyToken, updateLesson)
-  .delete(verifyToken, deleteLesson);
+  .put(verifyToken, userAuthorize(["instructor", "admin"]), updateLesson)
+  .delete(verifyToken, userAuthorize(["instructor", "admin"]), deleteLesson);
 
 export default lessonRoute;

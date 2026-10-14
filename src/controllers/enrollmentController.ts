@@ -2,14 +2,7 @@ import type { Request, Response } from "express";
 import Enrollment from "../models/Enrollment.js";
 import Course from "../models/Course.js";
 
-interface AuthRequest extends Request {
-  user?: {
-    userID: string;
-    userEmail: string;
-  };
-}
-
-export const enrollCourse = async (req: AuthRequest, res: Response) => {
+export const enrollCourse = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
     const userID = req.user?.userID;
@@ -74,7 +67,7 @@ export const enrollCourse = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getMyCourses = async (req: AuthRequest, res: Response) => {
+export const getMyCourses = async (req: Request, res: Response) => {
   try {
     const userID = req.user?.userID;
 

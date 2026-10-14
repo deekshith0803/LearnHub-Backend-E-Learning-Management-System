@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyToken } from "../middleware/token.js";
+import { userAuthorize, verifyToken } from "../middleware/token.js";
 import {
   getProgress,
   updateProgress,
@@ -9,7 +9,7 @@ const progressRoute = express.Router();
 
 progressRoute
   .route("/courses/:id/progress")
-  .put(verifyToken, updateProgress)
-  .get(verifyToken, getProgress);
+  .put(verifyToken, userAuthorize(["student"]), updateProgress)
+  .get(verifyToken, userAuthorize(["student"]), getProgress);
 
 export default progressRoute;

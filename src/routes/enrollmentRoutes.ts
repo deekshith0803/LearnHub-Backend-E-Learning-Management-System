@@ -1,5 +1,5 @@
 import express from "express";
-import { verifyToken } from "../middleware/token.js";
+import { userAuthorize, verifyToken } from "../middleware/token.js";
 import {
   enrollCourse,
   getMyCourses,
@@ -7,7 +7,12 @@ import {
 
 const enrollmentRoute = express.Router();
 
-enrollmentRoute.route("/courses/:id/enroll").post(verifyToken, enrollCourse);
-enrollmentRoute.route("/my-courses").get(verifyToken, getMyCourses);
+enrollmentRoute
+  .route("/courses/:id/enroll")
+  .post(verifyToken, userAuthorize(["student"]), enrollCourse);
+
+enrollmentRoute
+  .route("/my-courses")
+  .get(verifyToken, userAuthorize(["student"]), getMyCourses);
 
 export default enrollmentRoute;

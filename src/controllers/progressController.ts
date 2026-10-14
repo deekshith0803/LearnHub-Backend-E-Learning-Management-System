@@ -4,14 +4,7 @@ import Lesson from "../models/Lesson.js";
 import Progress from "../models/Progress.js";
 import mongoose from "mongoose";
 
-interface AuthRequest extends Request {
-  user?: {
-    userID: string;
-    userEmail: string;
-  };
-}
-
-export const updateProgress = async (req: AuthRequest, res: Response) => {
+export const updateProgress = async (req: Request, res: Response) => {
   try {
     const { id: courseId } = req.params;
     const lessonId = req.body?.lessonId;
@@ -112,7 +105,7 @@ export const updateProgress = async (req: AuthRequest, res: Response) => {
   }
 };
 
-export const getProgress = async (req: AuthRequest, res: Response) => {
+export const getProgress = async (req: Request, res: Response) => {
   try {
     const { id: courseId } = req.params;
     const studentId = req.user?.userID;

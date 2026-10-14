@@ -1,10 +1,15 @@
+import "express";
+
 declare global {
   namespace Express {
+    interface UserPayload {
+      userID: string;
+      userEmail: string;
+      userRole: string;
+    }
+
     interface Request {
-      user?: {
-        userID: string;
-        userEmail: string;
-      };
+      user?: UserPayload;
     }
   }
 }

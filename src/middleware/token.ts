@@ -1,10 +1,15 @@
 import type { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
 
-export const generateToken = (userID: string, userEmail: string): string => {
+export const generateToken = (
+  userID: string,
+  userEmail: string,
+  userRole: String,
+): string => {
   const userDatas = {
     userID,
     userEmail,
+    userRole,
   };
 
   const token = jwt.sign(userDatas, process.env.JWT_SECRET_KEY!, {
@@ -51,6 +56,7 @@ export const verifyToken = async (
     req.user = {
       userID: decoded.userID,
       userEmail: decoded.userEmail,
+      userRole: decoded.userRole,
     };
 
     return next();
@@ -60,4 +66,24 @@ export const verifyToken = async (
       message: "Invalid or expired token",
     });
   }
+};
+
+export const userAuthorize = (requiredRole: string[]) => {
+  return (req: Request, res: Response, next: NextFunction) => {
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first",
+      });
+    }
+
+    if (!requiredRole.includes(req.user.userRole)) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to access this resource",
+      });
+    }
+
+    return next();
+  };
 };
