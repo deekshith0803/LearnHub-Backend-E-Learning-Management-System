@@ -145,3 +145,98 @@ export const logout = (req: Request, res: Response) => {
     });
   }
 };
+export const updateProfile = async (req: Request, res: Response) => {
+  try {
+    const userID = req.user?.userID;
+
+    if (!userID) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first",
+      });
+    }
+
+    const { name, email, bio } = req.body;
+
+    const updates: {
+      name?: string;
+      email?: string;
+      bio?: string;
+    } = {};
+
+    if (name !== undefined) {
+      if (typeof name !== "string" || name.trim().length < 2) {
+        return res.status(400).json({
+          success: false,
+          message: "Name must contain at least two letters",
+        });
+      }
+
+      updates.name = name.trim();
+    }
+
+    if (email !== undefined) {
+      if (
+        typeof email !== "string" ||
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Please enter a valid email",
+        });
+      }
+
+      updates.email = email.trim().toLowerCase();
+    }
+
+    if (bio !== undefined) {
+      if (typeof bio !== "string" || bio.length > 300) {
+        return res.status(400).json({
+          success: false,
+          message: "Bio must be 300 characters or fewer",
+        });
+      }
+
+      updates.bio = bio.trim();
+    }
+
+    const user = await User.findByIdAndUpdate(
+      userID,
+      { $set: updates },
+      {
+        new: true,
+      },
+    ).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Profile updated successfully",
+      user,
+    });
+  } catch (error: unknown) {
+    // MongoDB duplicate-key error for an email already in use.
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      error.code === 11000
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: "This email is already registered",
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Something went wrong",
+    });
+  }
+};

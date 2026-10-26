@@ -1,6 +1,7 @@
 import express from "express";
 import {
   getProfile,
+  updateProfile,
   login,
   logout,
   register,
@@ -16,5 +17,6 @@ authRoute.route("/login").post(login);
 // Protected routes
 authRoute.route("/logout").post(verifyToken, logout);
 authRoute.route("/profile").get(verifyToken, getProfile);
+authRoute.route("/profile").put(verifyToken, updateProfile);
 
 export default authRoute;
