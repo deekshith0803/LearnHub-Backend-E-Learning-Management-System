@@ -13,16 +13,37 @@ export const register = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await User.create(req.body);
+    const normalizedEmail = email.toLowerCase().trim();
+
+    const existingUser = await User.findOne({ email: normalizedEmail });
+    if (existingUser) {
+      return res.status(409).json({
+        success: false,
+        message: "This email is already registered. Please sign in instead.",
+      });
+    }
+
+    const user = await User.create({
+      ...req.body,
+      name: name.trim(),
+      email: normalizedEmail,
+    });
 
     const { password: removePassword, ...userData } = user.toObject();
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
-      message: "user registered successfully",
+      message: "User registered successfully! Please sign in.",
       user: userData,
     });
-  } catch (error: unknown) {
+  } catch (error: any) {
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "This email is already registered. Please sign in instead.",
+      });
+    }
+
     if (error instanceof Error) {
       return res.status(500).json({
         success: false,
@@ -35,6 +56,7 @@ export const register = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const login = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -46,7 +68,8 @@ export const login = async (req: Request, res: Response) => {
       });
     }
 
-    const user = await User.findOne({ email });
+    const normalizedEmail = email.toLowerCase().trim();
+    const user = await User.findOne({ email: normalizedEmail }).select("+password");
 
     if (!user) {
       return res.status(401).json({
@@ -101,6 +124,7 @@ export const login = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const getProfile = async (req: Request, res: Response) => {
   try {
     const userID = req.user?.userID;
@@ -132,6 +156,7 @@ export const getProfile = async (req: Request, res: Response) => {
     });
   }
 };
+
 export const logout = (req: Request, res: Response) => {
   try {
     return res.status(200).clearCookie("token").json({
@@ -145,6 +170,7 @@ export const logout = (req: Request, res: Response) => {
     });
   }
 };
+
 export const updateProfile = async (req: Request, res: Response) => {
   try {
     const userID = req.user?.userID;
@@ -234,6 +260,72 @@ export const updateProfile = async (req: Request, res: Response) => {
       });
     }
 
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Something went wrong",
+    });
+  }
+};
+
+export const requestInstructorRole = async (req: Request, res: Response) => {
+  try {
+    const userID = req.user?.userID;
+
+    if (!userID) {
+      return res.status(401).json({
+        success: false,
+        message: "Please login first",
+      });
+    }
+
+    const { reason } = req.body;
+
+    const user = await User.findById(userID).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    if (user.role === "instructor") {
+      return res.status(400).json({
+        success: false,
+        message: "You are already an instructor",
+      });
+    }
+
+    if (user.role === "admin") {
+      return res.status(400).json({
+        success: false,
+        message: "Administrators cannot request instructor access",
+      });
+    }
+
+    if (user.instructorRequestStatus === "pending") {
+      return res.status(400).json({
+        success: false,
+        message:
+          "You already have a pending instructor request awaiting admin review",
+      });
+    }
+
+    user.instructorRequestStatus = "pending";
+    user.instructorRequestDate = new Date();
+    user.instructorRequestReason =
+      typeof reason === "string" ? reason.trim().slice(0, 500) : "";
+    user.instructorRequestFeedback = "";
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "Instructor request submitted successfully. Awaiting admin approval.",
+      user,
+    });
+  } catch (error: unknown) {
     return res.status(500).json({
       success: false,
       message: error instanceof Error ? error.message : "Something went wrong",

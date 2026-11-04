@@ -5,6 +5,7 @@ import {
   login,
   logout,
   register,
+  requestInstructorRole,
 } from "../controllers/authController.js";
 import { verifyToken } from "../middleware/token.js";
 
@@ -18,5 +19,8 @@ authRoute.route("/login").post(login);
 authRoute.route("/logout").post(verifyToken, logout);
 authRoute.route("/profile").get(verifyToken, getProfile);
 authRoute.route("/profile").put(verifyToken, updateProfile);
+authRoute
+  .route("/request-instructor")
+  .post(verifyToken, requestInstructorRole);
 
 export default authRoute;

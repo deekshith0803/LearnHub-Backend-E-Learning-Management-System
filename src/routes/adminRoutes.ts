@@ -6,6 +6,9 @@ import {
   getSingleUser,
   updateUserRole,
   updateUserStatus,
+  getInstructorRequests,
+  approveInstructorRequest,
+  rejectInstructorRequest,
 } from "../controllers/adminController.js";
 import { userAuthorize, verifyToken } from "../middleware/token.js";
 
@@ -34,5 +37,18 @@ adminRoute
 adminRoute
   .route("/admin/users/:id/status")
   .patch(verifyToken, userAuthorize(["admin"]), updateUserStatus);
+
+// Instructor Request moderation routes
+adminRoute
+  .route("/admin/instructor-requests")
+  .get(verifyToken, userAuthorize(["admin"]), getInstructorRequests);
+
+adminRoute
+  .route("/admin/instructor-requests/:id/approve")
+  .patch(verifyToken, userAuthorize(["admin"]), approveInstructorRequest);
+
+adminRoute
+  .route("/admin/instructor-requests/:id/reject")
+  .patch(verifyToken, userAuthorize(["admin"]), rejectInstructorRequest);
 
 export default adminRoute;

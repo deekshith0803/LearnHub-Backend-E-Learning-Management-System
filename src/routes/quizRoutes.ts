@@ -4,6 +4,8 @@ import {
   createQuiz,
   getQuiz,
   submitQuiz,
+  deleteQuiz,
+  updateQuiz,
 } from "../controllers/quizController.js";
 
 const quizRoute = express.Router();
@@ -20,5 +22,11 @@ quizRoute.route("/courses/:id/quiz").get(verifyToken, getQuiz);
 quizRoute
   .route("/quizzes/:id/submit")
   .post(verifyToken, userAuthorize(["student"]), submitQuiz);
+
+// Instructor/admin: update or delete a quiz
+quizRoute
+  .route("/quizzes/:id")
+  .put(verifyToken, userAuthorize(["instructor", "admin"]), updateQuiz)
+  .delete(verifyToken, userAuthorize(["instructor", "admin"]), deleteQuiz);
 
 export default quizRoute;

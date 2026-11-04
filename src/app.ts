@@ -11,10 +11,33 @@ import cors from "cors";
 
 const app = express();
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
 app.use(
   cors({
+    origin: (origin, callback) => {
+      // allow requests with no origin (like mobile apps, curl) or allowed origins
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("CORS origin not allowed: " + origin));
+      }
+    },
     credentials: true,
-    origin: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Cookie",
+      "X-Requested-With",
+      "Accept",
+    ],
+    optionsSuccessStatus: 200,
   }),
 );
 app.use(express.urlencoded({ extended: true }));

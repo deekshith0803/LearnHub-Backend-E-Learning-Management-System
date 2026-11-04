@@ -12,6 +12,8 @@ interface courseInterface {
   requirements: string[];
   whatYouWillLearn: string[];
   status: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 const courseSchema = new mongoose.Schema<courseInterface>(

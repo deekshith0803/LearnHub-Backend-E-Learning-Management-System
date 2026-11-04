@@ -174,3 +174,103 @@ export const getAllCourses = async (req: Request, res: Response) => {
     });
   }
 };
+
+export const getInstructorRequests = async (req: Request, res: Response) => {
+  try {
+    const requests = await User.find({
+      instructorRequestStatus: { $in: ["pending", "approved", "rejected"] },
+    })
+      .select("-password")
+      .sort({ instructorRequestDate: -1 });
+
+    return res.status(200).json({
+      success: true,
+      requests,
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Something went wrong",
+    });
+  }
+};
+
+export const approveInstructorRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (typeof id !== "string" || !id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const user = await User.findById(id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.role = "instructor";
+    user.instructorRequestStatus = "approved";
+    user.instructorRequestFeedback =
+      req.body.feedback || "Approved by Administrator";
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `${user.name} has been promoted to Instructor successfully`,
+      user,
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Something went wrong",
+    });
+  }
+};
+
+export const rejectInstructorRequest = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+
+    if (typeof id !== "string" || !id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid user ID",
+      });
+    }
+
+    const user = await User.findById(id).select("-password");
+
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    user.role = "student";
+    user.instructorRequestStatus = "rejected";
+    user.instructorRequestFeedback =
+      req.body.feedback || "Your request was declined by Administrator";
+
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: `Instructor request for ${user.name} has been rejected`,
+      user,
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Something went wrong",
+    });
+  }
+};

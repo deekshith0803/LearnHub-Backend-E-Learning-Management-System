@@ -36,6 +36,16 @@ export const createQuiz = async (req: Request, res: Response) => {
       });
     }
 
+    if (
+      req.user?.userRole !== "admin" &&
+      existingCourse.instructor?.toString() !== req.user?.userID
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only create quizzes for your own courses",
+      });
+    }
+
     const quiz = await Quiz.create({
       course,
       title,
@@ -62,6 +72,64 @@ export const createQuiz = async (req: Request, res: Response) => {
   }
 };
 
+export const updateQuiz = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    const { title, questions } = req.body;
+
+    if (!id || typeof id !== "string" || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid quiz ID",
+      });
+    }
+
+    const quiz = await Quiz.findById(id).populate("course");
+    if (!quiz) {
+      return res.status(404).json({
+        success: false,
+        message: "Quiz not found",
+      });
+    }
+
+    const course = quiz.course as any;
+    if (
+      req.user?.userRole !== "admin" &&
+      course?.instructor?.toString() !== req.user?.userID
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only update quizzes for your own courses",
+      });
+    }
+
+    const updates: Record<string, any> = {};
+    if (title && typeof title === "string" && title.trim().length >= 3) {
+      updates.title = title.trim();
+    }
+    if (Array.isArray(questions) && questions.length > 0) {
+      updates.questions = questions;
+    }
+
+    const updatedQuiz = await Quiz.findByIdAndUpdate(
+      id,
+      { $set: updates },
+      { new: true },
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Quiz updated successfully",
+      quiz: updatedQuiz,
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Something went wrong",
+    });
+  }
+};
+
 export const getQuiz = async (req: Request, res: Response) => {
   try {
     const { id: courseId } = req.params;
@@ -81,6 +149,49 @@ export const getQuiz = async (req: Request, res: Response) => {
       success: true,
       total: quizzes.length,
       quizzes,
+    });
+  } catch (error: unknown) {
+    return res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : "Something went wrong",
+    });
+  }
+};
+
+export const deleteQuiz = async (req: Request, res: Response) => {
+  try {
+    const { id } = req.params;
+    if (!id || typeof id !== "string" || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid quiz ID",
+      });
+    }
+
+    const quiz = await Quiz.findById(id).populate("course");
+    if (!quiz) {
+      return res.status(404).json({
+        success: false,
+        message: "Quiz not found",
+      });
+    }
+
+    const course = quiz.course as any;
+    if (
+      req.user?.userRole !== "admin" &&
+      course?.instructor?.toString() !== req.user?.userID
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: "You can only delete quizzes for your own courses",
+      });
+    }
+
+    await Quiz.findByIdAndDelete(id);
+
+    return res.status(200).json({
+      success: true,
+      message: "Quiz deleted successfully",
     });
   } catch (error: unknown) {
     return res.status(500).json({

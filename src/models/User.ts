@@ -9,6 +9,10 @@ interface UserInterface {
   status: boolean;
   bio?: string;
   profilePicture?: string;
+  instructorRequestStatus?: "none" | "pending" | "approved" | "rejected";
+  instructorRequestDate?: Date;
+  instructorRequestReason?: string;
+  instructorRequestFeedback?: string;
 }
 
 export const userSchema = new mongoose.Schema<UserInterface>(
@@ -50,6 +54,30 @@ export const userSchema = new mongoose.Schema<UserInterface>(
       type: String,
       default: "",
       maxlength: [300, "Bio cannot exceed 300 characters"],
+      trim: true,
+    },
+
+    instructorRequestStatus: {
+      type: String,
+      enum: ["none", "pending", "approved", "rejected"],
+      default: "none",
+    },
+
+    instructorRequestDate: {
+      type: Date,
+    },
+
+    instructorRequestReason: {
+      type: String,
+      default: "",
+      maxlength: [500, "Reason cannot exceed 500 characters"],
+      trim: true,
+    },
+
+    instructorRequestFeedback: {
+      type: String,
+      default: "",
+      maxlength: [500, "Feedback cannot exceed 500 characters"],
       trim: true,
     },
   },

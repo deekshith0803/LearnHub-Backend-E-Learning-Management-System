@@ -1,177 +1,205 @@
 # LearnHub Backend – E-Learning Management System
 
-LearnHub is a **MERN stack Learning Management System (LMS)** backend that provides APIs for user authentication, course management, lessons, enrollments, learning progress, quizzes, and administration.
+LearnHub Backend is a robust, modular **Node.js, Express, and TypeScript** REST API server for a multi-role E-Learning Management System (LMS). It handles user authentication, course management, lessons, enrollments, student progress tracking, quizzes, and complete administrative control.
+
+---
 
 ## 🚀 Features
 
-- **Authentication** – User registration, login, logout, and profile.
-- **Role-Based Authorization** – Student, instructor, and admin roles.
-- **Course Management** – Create, view, update, and delete courses.
-- **Lesson Management** – Manage lessons associated with courses.
-- **Enrollments** – Enroll students in courses and view enrolled courses.
-- **Learning Progress** – Track completed lessons and course completion percentage.
-- **Quizzes** – Create quizzes, submit answers, and calculate scores.
-- **Admin Dashboard APIs** – View statistics, manage users, update user roles and status, and view courses.
-- **MongoDB Integration** – Store application data using MongoDB and Mongoose.
-- **JWT Authentication** – Protect routes using JSON Web Tokens and HTTP-only cookies.
+- **JWT Authentication in HTTP-Only Cookies:** Secure login, registration, and logout with bcrypt password hashing and token verification middleware.
+- **Role-Based Access Control (RBAC):** Strict route authorization for `student`, `instructor`, and `admin` roles.
+- **Course & Lesson Management:** Create, update, publish/draft, and delete courses and multimedia lessons.
+- **Enrollment & Learning Progress:** Student course enrollment, lesson completion tracking, and automatic completion percentage calculation.
+- **Quiz Engine:** Instructors can build quizzes with questions, options, and correct answers. Students can submit answers and get instant graded results.
+- **Admin Oversight & Moderation:** System analytics, user status moderation (active/blocked), role management, course visibility, and moderation of student-to-instructor role applications.
+- **MongoDB & Mongoose:** Fully typed schemas with relationships, timestamps, and indexes.
+- **Strict CORS & Preflight Support:** Configured for cross-origin cookie sharing with the Vite client.
+
+---
 
 ## 🛠️ Tech Stack
 
-- Node.js
-- Express.js
-- TypeScript
-- MongoDB
-- Mongoose
-- JSON Web Token (JWT)
-- bcrypt
-- dotenv
-- cookie-parser
+- **Runtime:** Node.js (v18+)
+- **Framework:** Express.js 5
+- **Language:** TypeScript
+- **Database:** MongoDB & Mongoose 9
+- **Authentication:** JSON Web Tokens (`jsonwebtoken`) & `bcrypt`
+- **Cookies & Parsing:** `cookie-parser`, `express.json()`, `express.urlencoded()`
+- **CORS:** `cors` with credentials support
+- **Dev Execution:** `tsx watch`
+
+---
 
 ## 📁 Project Structure
 
 ```text
-src/
-├── controllers/
-├── middleware/
-├── models/
-├── routes/
-├── types/
-├── app.ts
-└── index.ts
+LearnHub-Server/
+├── src/
+│   ├── controllers/
+│   │   ├── adminController.ts      # Platform stats, users, course moderation, instructor requests
+│   │   ├── authController.ts       # Register, login, logout, profile, role upgrade requests
+│   │   ├── courseController.ts     # Public catalog, course CRUD, instructor analytics
+│   │   ├── enrollmentController.ts # Course enrollments, enrolled course lists
+│   │   ├── lessonController.ts     # Lesson CRUD linked to courses
+│   │   ├── progressController.ts   # Progress retrieval and lesson completion updates
+│   │   └── quizController.ts       # Quiz CRUD and student submissions
+│   ├── middleware/
+│   │   └── token.ts                # JWT cookie verification & RBAC authorization
+│   ├── models/
+│   │   ├── Course.ts               # Course schema
+│   │   ├── Enrollment.ts           # Enrollment schema
+│   │   ├── InstructorRequest.ts    # Student instructor application schema
+│   │   ├── Lesson.ts               # Lesson schema
+│   │   ├── Progress.ts             # Course progress schema
+│   │   ├── Quiz.ts                 # Quiz and question schema
+│   │   └── User.ts                 # User credentials and roles schema
+│   ├── routes/
+│   │   ├── adminRoutes.ts          # /api/admin/*
+│   │   ├── authRoutes.ts           # /api/auth/*
+│   │   ├── courseRoutes.ts         # /api/courses, /api/instructor/*
+│   │   ├── enrollmentRoutes.ts     # /api/courses/:id/enroll, /api/my-courses
+│   │   ├── lessonRoutes.ts         # /api/courses/:id/lessons, /api/lessons/:id
+│   │   ├── progressRoutes.ts       # /api/courses/:id/progress
+│   │   └── quizRoutes.ts           # /api/courses/:id/quiz, /api/quizzes/:id
+│   ├── app.ts                      # Express app, CORS configuration, and route mounting
+│   └── index.ts                    # Server entry point & MongoDB connection
+├── .env.example                    # Sample environment variables
+├── package.json
+└── tsconfig.json
 ```
 
-## ⚙️ Installation
+---
 
-### 1. Clone the repository
+## ⚙️ Installation & Setup
 
+### 1. Prerequisites
+- **Node.js (v18+)**
+- **MongoDB** instance (MongoDB Atlas connection URI or local MongoDB)
+
+### 2. Clone the Repository
 ```bash
 git clone https://github.com/deekshith0803/LearnHub-Backend-E-Learning-Management-System.git
 cd LearnHub-Backend-E-Learning-Management-System
 ```
 
-### 2. Install dependencies
-
+### 3. Install Dependencies
 ```bash
 npm install
 ```
 
-### 3. Configure environment variables
-
-Create a `.env` file in the project root:
-
-```env
-PORT=5001
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET_KEY=your_jwt_secret
+### 4. Configure Environment Variables
+Create a `.env` file in the root of `LearnHub-Server`:
+```bash
+cp .env.example .env
 ```
 
-Replace the example values with your actual configuration. **Never commit your `.env` file or expose your secrets on GitHub.**
+Configure your variables:
+```env
+PORT=5002
+MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.example.mongodb.net/LearnHub?retryWrites=true&w=majority
+JWT_SECRET_KEY=your_jwt_secret_key_here
+```
 
-### 4. Start the development server
+| Variable | Description | Default / Example |
+| :--- | :--- | :--- |
+| `PORT` | Port the Express server listens on | `5002` |
+| `MONGODB_URI` | MongoDB connection connection string | `mongodb+srv://...` |
+| `JWT_SECRET_KEY` | Secret key used to sign and verify JWT cookies | Secure random string |
 
+> **Important:** Never commit your `.env` file or expose MongoDB/JWT secrets.
+
+### 5. Start in Development Mode
 ```bash
 npm run dev
 ```
+The server will watch for changes and listen at `http://localhost:5002`.
 
-### 5. Build and run for production
-
+### 6. Build & Start for Production
 ```bash
 npm run build
 npm start
 ```
 
-Check your `package.json` to confirm that these scripts are configured.
+---
 
-## 🔗 API Endpoints
+## 🔗 REST API Endpoints (All 35 Endpoints)
 
-The following endpoints are implemented in the project.
+### 1. Authentication & Profile (`/api/auth`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/auth/register` | Public | Register a new user |
+| **POST** | `/api/auth/login` | Public | Authenticate user and issue JWT cookie |
+| **POST** | `/api/auth/logout` | Authenticated | Invalidate JWT cookie |
+| **GET** | `/api/auth/profile` | Authenticated | Get current authenticated user profile |
+| **PUT** | `/api/auth/profile` | Authenticated | Update profile name or password |
+| **POST** | `/api/auth/request-instructor` | Authenticated | Submit request to become an Instructor |
 
-### Authentication
+### 2. Courses (`/api`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/courses` | Public | List all courses with category/search filters |
+| **GET** | `/api/courses/:id` | Public | Get single course details by ID |
+| **POST** | `/api/courses` | Instructor / Admin | Create a new course |
+| **PUT** | `/api/courses/:id` | Instructor / Admin | Update course details or publish status |
+| **DELETE** | `/api/courses/:id` | Instructor / Admin | Delete a course |
+| **GET** | `/api/instructor/courses` | Instructor / Admin | Get courses created by the current instructor |
+| **GET** | `/api/instructor/stats` | Instructor / Admin | Get instructor performance metrics |
 
-| Method | Endpoint             | Description                          |
-| ------ | -------------------- | ------------------------------------ |
-| POST   | `/api/auth/register` | Register a user                      |
-| POST   | `/api/auth/login`    | Log in                               |
-| POST   | `/api/auth/logout`   | Log out                              |
-| GET    | `/api/auth/profile`  | Get the authenticated user's profile |
+### 3. Lessons (`/api`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/courses/:id/lessons` | Public / Enrolled | Get all lessons for a specific course |
+| **POST** | `/api/courses/:id/lessons` | Instructor / Admin | Add a new lesson to a course |
+| **PUT** | `/api/lessons/:id` | Instructor / Admin | Update lesson title, video URL, or duration |
+| **DELETE** | `/api/lessons/:id` | Instructor / Admin | Delete a lesson |
 
-### Courses
+### 4. Enrollments (`/api`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/courses/:id/enroll` | Student | Enroll current student in a course |
+| **GET** | `/api/my-courses` | Student | Get all courses enrolled by the current student |
 
-| Method | Endpoint                  | Description               |
-| ------ | ------------------------- | ------------------------- |
-| GET    | `/api/courses`            | Get all courses           |
-| GET    | `/api/courses/:id`        | Get a course by ID        |
-| POST   | `/api/courses`            | Create a course           |
-| PUT    | `/api/courses/:id`        | Update a course           |
-| DELETE | `/api/courses/:id`        | Delete a course           |
-| GET    | `/api/instructor/courses` | Get instructor courses    |
-| GET    | `/api/instructor/stats`   | Get instructor statistics |
+### 5. Learning Progress (`/api`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/courses/:id/progress` | Student | Get completion progress for a course |
+| **PUT** | `/api/courses/:id/progress` | Student | Mark a lesson as completed & recalculate progress |
 
-### Lessons
+### 6. Quizzes (`/api`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **POST** | `/api/courses/:id/quiz` | Instructor / Admin | Create a quiz with multiple choice questions |
+| **GET** | `/api/courses/:id/quiz` | Authenticated | Get quiz for a course |
+| **POST** | `/api/quizzes/:id/submit` | Student | Submit quiz answers and receive score/feedback |
+| **PUT** | `/api/quizzes/:id` | Instructor / Admin | Update quiz title, questions, or answers |
+| **DELETE** | `/api/quizzes/:id` | Instructor / Admin | Delete a quiz |
 
-| Method | Endpoint                   | Description        |
-| ------ | -------------------------- | ------------------ |
-| GET    | `/api/courses/:id/lessons` | Get course lessons |
-| POST   | `/api/courses/:id/lessons` | Create a lesson    |
-| PUT    | `/api/lessons/:id`         | Update a lesson    |
-| DELETE | `/api/lessons/:id`         | Delete a lesson    |
+### 7. Administration (`/api`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| **GET** | `/api/admin/stats` | Admin | Get platform-wide overview analytics |
+| **GET** | `/api/admin/users` | Admin | Get list of all registered users |
+| **GET** | `/api/admin/users/:id` | Admin | Get specific user profile and history |
+| **PATCH** | `/api/admin/users/:id/role` | Admin | Change user role (`student`, `instructor`, `admin`) |
+| **PATCH** | `/api/admin/users/:id/status` | Admin | Change user account status (`active`, `blocked`) |
+| **GET** | `/api/admin/courses` | Admin | Get all platform courses |
+| **GET** | `/api/admin/instructor-requests` | Admin | Get all pending instructor applications |
+| **PATCH** | `/api/admin/instructor-requests/:id/approve` | Admin | Approve application and upgrade user to instructor |
+| **PATCH** | `/api/admin/instructor-requests/:id/reject` | Admin | Reject application with optional admin feedback |
 
-### Enrollments
+---
 
-| Method | Endpoint                  | Description          |
-| ------ | ------------------------- | -------------------- |
-| POST   | `/api/courses/:id/enroll` | Enroll in a course   |
-| GET    | `/api/my-courses`         | Get enrolled courses |
+## 🔐 Security & Validation
 
-### Learning Progress
+- **Bcrypt Hashing:** Passwords are never stored in plaintext and are salted with `bcrypt.hash(password, 10)`.
+- **JWT Cookies:** Tokens are sent in `httpOnly`, `sameSite: "lax"`, signed cookies to prevent token interception.
+- **CORS Protection:** Explicit origin whitelisting (`http://localhost:5173`) with credentials authorization.
+- **Mongoose Constraints:** Duplicate emails rejected with `409 Conflict`, input normalization (email trimming and lowercase conversion).
 
-| Method | Endpoint                    | Description              |
-| ------ | --------------------------- | ------------------------ |
-| PUT    | `/api/courses/:id/progress` | Update learning progress |
-| GET    | `/api/courses/:id/progress` | Get learning progress    |
-
-### Quizzes
-
-| Method | Endpoint                  | Description         |
-| ------ | ------------------------- | ------------------- |
-| POST   | `/api/courses/:id/quiz`   | Create a quiz       |
-| GET    | `/api/courses/:id/quiz`   | Get a course quiz   |
-| POST   | `/api/quizzes/:id/submit` | Submit quiz answers |
-
-### Admin
-
-| Method | Endpoint               | Description             |
-| ------ | ---------------------- | ----------------------- |
-| GET    | `/api/admin/stats`     | Get platform statistics |
-| GET    | `/api/admin/users`     | Get all users           |
-| GET    | `/api/admin/users/:id` | Get a user by ID        |
-| GET    | `/api/admin/courses`   | Get all courses         |
-
-**Note:** Protected endpoints require authentication and, where applicable, the correct user role.
-
-## 🔐 Security
-
-- Password hashing with bcrypt.
-- JWT-based authentication.
-- HTTP-only authentication cookies.
-- Role-based access control.
-- Input validation for supported operations.
-
-## 🧪 API Testing
-
-Use **Postman** to test the API endpoints. For protected routes, log in first and send the authentication cookie with subsequent requests.
-
-## 🗺️ Future Improvements
-
-- Payment integration.
-- Quiz attempt and result history.
-- Pagination and filtering.
-- Improved validation and error handling.
-- Additional course analytics and reporting.
+---
 
 ## 👨‍💻 Author
 
 **Deekshith M**
-
-- GitHub: [deekshith0803](https://github.com/deekshith0803)
+- GitHub: [@deekshith0803](https://github.com/deekshith0803)
 - Portfolio: [deekshith-five.vercel.app](https://deekshith-five.vercel.app/)
