@@ -20,14 +20,7 @@ const allowedOrigins = [
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // allow requests with no origin (like mobile apps, curl) or allowed origins
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("CORS origin not allowed: " + origin));
-      }
-    },
+    origin: process.env.CLIENT_URL,
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allowedHeaders: [
@@ -48,7 +41,7 @@ app.get("/", (req, res) => {
   res.send("LearnHub Server is running");
 });
 
-app.use("/api/auth", authRoute);
+app.use("/api", authRoute);
 app.use("/api", courseRoute);
 app.use("/api", lessonRoute);
 app.use("/api", enrollmentRoute);
